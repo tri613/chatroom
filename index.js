@@ -15,7 +15,12 @@ chat.use(function(socket, next) {
     sessionMiddleware(socket.request, socket.request.res, next);
 });
 app.use(sessionMiddleware);
-
+let _g = 0;
+app.use((req, res, next) => {
+	_g++;
+	console.log(`${req.method} ${req.url} : ${_g}`);
+	next();
+})
 app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/public/rooms.html');
 });
@@ -30,12 +35,30 @@ app.post('/register', (req, res) => {
 	res.redirect('/chatroom');
 });
 
-app.use(function(req, res, next) {
-	if (!req.session.room || !req.session.name) {
-		console.log('not okay');
-		res.redirect('/');
+chat.use((socket, next) => {
+	console.log('io check');
+	const { room , name } = socket.request.session;
+	console.log(room , name);
+
+	if (room && room !== undefined && name && name !== undefined) {
+		console.log('io check ok');
+	} else {
+		console.log(`io check fail, disconnent client ${socket.id}`);
+		socket.disconnect();
 	}
 	next();
+});
+
+app.use(function(req, res, next) {
+	const { room, name } = req.session;
+	console.log(room, name);
+	if (room && room !== undefined && name && name !== undefined) {
+		next();
+	} else {
+		console.log('not okay');
+		res.redirect('/');
+		return;
+	}
 });
 
 app.get('/chatroom', function(req, res) {
@@ -44,16 +67,29 @@ app.get('/chatroom', function(req, res) {
 
 chat.on('connection', (socket) => {
 	const { room , name } = socket.request.session;
+	socket.username = name;
+
+	console.log('connection', socket.username);
 	socket.join(room);
 	socket.emit('login', {room: room});
-	socket.name = name;
 	socket.broadcast.to(room).emit('new-user', {id: socket.id, name: name});
 	socket.on('disconnect', () => socket.broadcast.emit('user-left', {name}));
 	socket.on('new-chat-msg', ({msg}) => {
 		chat.to(room).emit('update-chat-msg', { msg, name });
 	});
+	getRoomsClients();
 })
 
 http.listen(4000, function() {
   console.log('listening on *:4000');
 });
+
+function getRoomsClients(room) {
+	const clients = chat.in(room).connected;
+	const users = [];
+	for (let id in clients) {
+		const username = clients[id].username;
+		users.push({id, username});
+	}
+	return users;
+}

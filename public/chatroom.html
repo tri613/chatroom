@@ -32,7 +32,8 @@
       socket
         .on('login', ({room}) => $('#room').text(room))
         .on('update-chat-msg', ({msg, name}) => appendMsg(name, msg))
-        .on('new-user', ({name}) => appendMsg('system', `${name} is in the house!`, true));
+        .on('new-user', ({name}) => appendMsg('system', `${name} is in the house!`, true))
+        .on('user-left', ({name}) => appendMsg('system', `${name} left.`, true))
 
       function sendMsg(e) {
         e.preventDefault();
