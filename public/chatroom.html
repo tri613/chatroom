@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Chat @ <span id="room"></span></h1>
+      <form class="sticky-top">
+        <div class="input-group">
+          <input id="m" autocomplete="off" class="form-control" />
+          <span class="input-group-btn">
+            <button class="btn btn-primary">Send</button>
+          </span>
+        </div>
+      </form>
+      <hr>
+      <ul id="messages" class="list-group"></ul>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+     
+      const socket = io("/chat");
+      const $msg = $('#m');
+
+      $('form').submit(sendMsg);
+
+      socket
+        .on('login', ({room}) => $('#room').text(room))
+        .on('update-chat-msg', ({msg, name}) => appendMsg(name, msg))
+        .on('new-user', ({name}) => appendMsg('system', `${name} is in the house!`, true));
+
+      function sendMsg(e) {
+        e.preventDefault();
+        socket.emit('new-chat-msg', { msg: $msg.val() });
+        $msg.val('');
+      }
+
+      function appendMsg(user, msg, system = false) {
+        const base = ['text-primary', 'text-success', 'text-info', 'text-warning', 'text-danger'];
+        const color = (system) ? 'text-muted' : base[getRandomInt(0, base.length)];
+        $('#messages').prepend(`
+          <li class="list-group-item justfiy-content-between row ${ (system) ? 'bg-success': ''}">
+            <div class="col-8">
+              <span class="${color} mr-3">${user}</span>
+              <span>${msg}</span>
+            </div>
+            <div class="col-4 text-right">
+              <span class="text-muted">${moment().format("HH:mm:ss YYYY-MM-DD")}</span> 
+            </div>
+          </li>
+        `);
+      }
+
+      function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min)) + min;
+      }
+
+    </script>
+  </body>
+</html>

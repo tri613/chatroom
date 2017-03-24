@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Rooms</h1>
+      <form action="/register/" method="post" accept-charset="utf-8">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" class="form-control" name="name" placeholder="">
+        </div>
+
+        <div class="form-group">
+          <label for="">Rooms</label>
+          <select name="room" id="" class="form-control">
+              <option value="room-1">room 1</option>
+              <option value="room-2">room 2</option>
+              <option value="room-3">room 3</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary">submit</button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>
