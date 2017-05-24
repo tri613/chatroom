@@ -4,7 +4,7 @@ const sessionMiddleware = require('./session-middleware');
 module.exports = (http) => {
 	const chat = io(http).of('/chat');
 	
-	chat.use(function(socket, next) {
+	chat.use((socket, next) => {
 	    sessionMiddleware(socket.request, socket.request.res, next);
 	});
 
@@ -34,11 +34,10 @@ module.exports = (http) => {
 		socket.on('new-chat-msg', ({msg}) => {
 			chat.to(room).emit('update-chat-msg', { msg, name });
 		});
-		getRoomsClients(chat, room);
 	});
 };
 
-function getRoomsClients(io, room) {
+function getRoomClients(io, room) {
 	const clients = io.in(room).connected;
 	const users = [];
 	for (let id in clients) {

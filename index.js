@@ -4,6 +4,7 @@ const http = require('http').Server(app);
 const io = require('./server/chat-socket')(http);
 const sessionMiddleware = require('./server/session-middleware');
 const bodyParser = require('body-parser');
+const port = process.env.PORT || 8080;
 
 app.use(sessionMiddleware);
 app.use((req, res, next) => {
@@ -41,4 +42,4 @@ app.get('/chatroom', (req, res) => {
 	res.sendFile(__dirname + '/public/chatroom.html');
 });
 
-http.listen(4000, () => console.log('listening on *:4000'));
+http.listen(port, () => console.log(`listening on *:${port}`));
